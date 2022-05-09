@@ -7,44 +7,44 @@ jobs:
     
     - uses: azure/docker-login@v1
       with:
-        login-server: fnacr101.azurecr.io
-        username: ${{ secrets.acr_fnacr101_username }}
-        password: ${{ secrets.acr_fnacr101_password }}
+        login-server: containerregofirkat.azurecr.io
+        username: ${{ secrets.acr_containerregofirkat_username }}
+        password: ${{ secrets.acr_containerregofirkat_password }}
     
     - name: Build and push image to ACR
       id: build-image
       run: |
-        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t fnacr101.azurecr.io/akslab:${{ github.sha }} --label dockerfile-path=Dockerfile
-        docker push fnacr101.azurecr.io/akslab:${{ github.sha }}
+        docker build "$GITHUB_WORKSPACE/" -f  "Dockerfile" -t containerregofirkat.azurecr.io/aksofirkat:${{ github.sha }} --label dockerfile-path=Dockerfile
+        docker push containerregofirkat.azurecr.io/aksofirkat:${{ github.sha }}
     
     - uses: azure/k8s-set-context@v1
       with:
-         kubeconfig: ${{ secrets.aks_akslab_kubeConfig }}
+         kubeconfig: ${{ secrets.aks_aksofirkat_kubeConfig }}
       id: login
     
     - name: Create namespace
       run: |
-        namespacePresent=`kubectl get namespace | grep akslabb346 | wc -l`
+        namespacePresent=`kubectl get namespace | grep aks-ofirkata1ed | wc -l`
         if [ $namespacePresent -eq 0 ]
         then
-            echo `kubectl create namespace akslabb346`
+            echo `kubectl create namespace aks-ofirkata1ed`
         fi
 
     - uses: azure/k8s-create-secret@v1
       with:
-        namespace: akslabb346
-        container-registry-url: fnacr101.azurecr.io
-        container-registry-username: ${{ secrets.acr_fnacr101_username }}
-        container-registry-password: ${{ secrets.acr_fnacr101_password }}
-        secret-name: akslabdockerauth
+        namespace: aks-ofirkata1ed
+        container-registry-url: containerregofirkat.azurecr.io
+        container-registry-username: ${{ secrets.acr_containerregofirkat_username }}
+        container-registry-password: ${{ secrets.acr_containerregofirkat_password }}
+        secret-name: aksofirkatdockerauth
        
     - uses: azure/k8s-deploy@v1.2
       with:
-        namespace: akslabb346
+        namespace: aks-ofirkata1ed
         manifests: |
-          manifests/deployment-6.yml
-          manifests/service-6.yml
+          manifests/deployment-7.yml
+          manifests/service-7.yml
         images: |
-          fnacr101.azurecr.io/akslab:${{ github.sha }}
+          containerregofirkat.azurecr.io/aksofirkat:${{ github.sha }}
         imagepullsecrets: |
-          akslabdockerauth
+          aksofirkatdockerauth
